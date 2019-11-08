@@ -1,0 +1,7 @@
+﻿## Interface: 11302
+## Title: FishGo
+## Notes: FishGo
+## Author: Hwaipy
+
+FishGo.lua
+FishGo.xml
