@@ -60,8 +60,13 @@ object PD extends JFXApp {
     visualBounds.width * 0.05 - properties.getProperty("UI.Package.XExt", "0").toDouble,
     visualBounds.height * 0.4 + properties.getProperty("UI.Package.YExt", "0").toDouble
   )
+  val loopDelay = properties.getProperty("LinkGo.Loop.Delay", "5000").toLong
+  val fishEnabled = properties.getProperty("Fish.Go", "false").toBoolean
+  val battleNetPath = properties.getProperty("Battle.Net", "Battle.net.exe")
+
   val fishing = new AtomicBoolean(false)
   val autoOpenShell = new AtomicBoolean(false)
+  val autoReconnect = new AtomicBoolean(false)
   val exited = new AtomicBoolean(false)
   var positionShower: (Double, Double) => Unit = null
   var thresholdR2G = 1.0
@@ -73,13 +78,34 @@ object PD extends JFXApp {
 
   def linkCheck() = {
     val currentTime = System.currentTimeMillis()
-    if (currentTime - linkCheckTimeStamp.get > 5000) {
+    if (currentTime - linkCheckTimeStamp.get > loopDelay) {
       linkCheckTimeStamp set currentTime
       val screenSize = Toolkit.getDefaultToolkit.getScreenSize
       val linkStatus = LinkGo.status(robot.createScreenCapture(new Rectangle(0, 0, screenSize.width, screenSize.height)))
       println(linkStatus)
       Platform.runLater(() => linkStatusLabelLink.get.text = linkStatus)
+
+      linkStatus match {
+        case "QUEUE" =>
+        case "ERROR" => linkReopen(2)
+        case "LOGIN" => linkReopen(1)
+        case "BEGIN" => actionKeyClick(KeyEvent.VK_ENTER)
+        case "NORMAL" =>
+      }
     }
+  }
+
+  def linkReopen(c: Int) = {
+    linkCheckTimeStamp set System.currentTimeMillis()
+    Range(0, c).foreach(_ => {
+      actionKeyClick(KeyEvent.VK_ESCAPE)
+      delay(1000, 1500)
+    })
+    delay(1000, 1500)
+    Runtime.getRuntime.exec(battleNetPath)
+    delay(8000, 9500)
+    actionKeyClick(KeyEvent.VK_ENTER)
+    linkCheckTimeStamp set System.currentTimeMillis()
   }
 
   Future[Unit] {
@@ -91,7 +117,7 @@ object PD extends JFXApp {
       if (!fishing.get) {
         delay(1000)
         status = "Ready"
-        linkCheck()
+        if(autoReconnect.get) linkCheck()
       }
       else {
         status match {
@@ -145,7 +171,7 @@ object PD extends JFXApp {
     x = 0
     y = 0
     width = visualBounds.width
-    height = visualBounds.height * 0 + 100
+    height = visualBounds.height
     scene = new Scene {
       stylesheets.add(ClassLoader.getSystemClassLoader.getResource("com/hwaipy/wow/PD.css").toExternalForm)
       root = new AnchorPane {
@@ -155,7 +181,7 @@ object PD extends JFXApp {
           padding = Insets(10, 10, 10, 10)
           styleClass += "configPane"
           prefHeight = 50 + properties.getProperty("UI.Config.HeightExt", "0").toDouble
-          prefWidth = 800 + properties.getProperty("UI.Config.WidthExt", "0").toDouble
+          prefWidth = (if(fishEnabled) 1000 else 500) + properties.getProperty("UI.Config.WidthExt", "0").toDouble
 
           val quitButton = new Button("Quit") {
             onAction = () => {
@@ -163,16 +189,15 @@ object PD extends JFXApp {
               stage.close()
             }
           }
-//          val linkButton = new Button("Link") {
-//            onAction = () => {
-//              val screenSize = Toolkit.getDefaultToolkit.getScreenSize
-//              val screenShot = robot.createScreenCapture(new Rectangle(0, 0, screenSize.width, screenSize.height))
-//              val saved = ImageIO.read(new File("/Users/Hwaipy/Downloads/WOWGO-master/LinkGo/Test/WOWT/2.png"))
-//              val linkStatus = LinkGo.status(screenShot)
-//              println(linkStatus)
-//              Platform.runLater(() => linkStatusLabelLink.get.text = linkStatus)
-//            }
-//          }
+          val openButton = new Button("Open") {
+            onAction = () => {
+              disable = true
+              new Thread(()=>{
+                linkReopen(0)
+                Platform.runLater(()=> disable = false)
+              }).start()
+            }
+          }
           val snapshotButton = new Button("Snapshot") {
             onAction = () => {
               val center = capture(true)
@@ -189,6 +214,12 @@ object PD extends JFXApp {
             style = "-fx-text-fill: black;"
             onAction = () => {
               autoOpenShell set this.selected.value
+            }
+          }
+          val autoReconnectCheckBox = new CheckBox("Auto Reconnect") {
+            style = "-fx-text-fill: black;"
+            onAction = () => {
+              autoReconnect set this.selected.value
             }
           }
           val thresholdFieldG2B = new TextField() {
@@ -235,11 +266,13 @@ object PD extends JFXApp {
           }
           val labelStatus = new Label("Normal") {
             style = "-fx-text-fill: black;"
-            prefWidth = 100
+            prefWidth = 60
           }
           linkStatusLabelLink set labelStatus
-          children = Seq(
-            //            linkButton,
+          children = if (fishEnabled)
+            Seq(
+            openButton,
+            autoReconnectCheckBox,
             labelStatus,
             new AnchorPane {
               prefWidth = 20
@@ -263,6 +296,15 @@ object PD extends JFXApp {
               prefWidth = 20
             },
             quitButton)
+          else
+            Seq(
+              openButton,
+              autoReconnectCheckBox,
+              labelStatus,
+              new AnchorPane {
+                prefWidth = 20
+              },
+              quitButton)
         }
         val actionPane = new AnchorPane {
           styleClass += "actionPane"
@@ -309,7 +351,7 @@ object PD extends JFXApp {
         AnchorPane.setTopAnchor(packagePane, packagePosition._2)
         AnchorPane.setRightAnchor(packagePane, packagePosition._1)
 
-        children = Seq(configPane, actionPane, packagePane)
+        children = if(fishEnabled)Seq(configPane, actionPane, packagePane)else Seq(configPane)
       }
     }
     scene.value.setFill(null)

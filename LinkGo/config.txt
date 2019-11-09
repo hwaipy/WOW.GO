@@ -36,6 +36,8 @@ UI.Package.XExt = -25
 
 UI.Package.YExt = 5
 
+Fish.Go = false
+
 
 Package.Count.X = 9
 
@@ -44,3 +46,7 @@ Package.Count.Y = 9
 Package.Cell.Size = 48
 
 Package.Cell.Count = 78
+
+LinkGo.Loop.Delay = 30000
+
+Battle.Net = E:/Entertainment/Battle.net/Battle.net.exe
