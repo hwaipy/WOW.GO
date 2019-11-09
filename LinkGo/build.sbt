@@ -5,6 +5,7 @@ version := "0.1.1"
 scalaVersion := "2.12.8"
 organization := "com.hydra"
 libraryDependencies += "org.scalafx" %% "scalafx" % "11-R16"
+libraryDependencies += "net.sourceforge.tess4j" % "tess4j" % "3.2.1"
 // Determine OS version of JavaFX binaries
 lazy val osName = System.getProperty("os.name") match {
   case n if n.startsWith("Linux") => "linux"
