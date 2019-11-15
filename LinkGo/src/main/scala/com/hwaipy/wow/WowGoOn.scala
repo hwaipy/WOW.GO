@@ -2,22 +2,28 @@ package com.hwaipy.wow
 
 import java.io.{File, FileReader, PrintWriter}
 import java.util.Properties
-
+import java.util.concurrent.Executors
 import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
 import scalafx.scene.control.{Button, CheckBox, Label, ToggleButton}
-import scalafx.scene.layout.{AnchorPane, HBox, Region}
+import scalafx.scene.layout.{AnchorPane, HBox}
 import scalafx.stage.{FileChooser, Screen, StageStyle}
 import scalafx.Includes._
 import scalafx.beans.property.{BooleanProperty, StringProperty}
+import scala.concurrent.{ExecutionContext, Future}
+import scala.language.postfixOps
 
 object WowGoOn extends JFXApp {
   //  WowGo.run()
   private val visualBounds = Screen.primary.visualBounds
   private val properties = new Properties()
   private val battleNetPath = new StringProperty("")
+  private val battleNetPathValid = new BooleanProperty()
+  battleNetPath.onChange((a, b, c) => battleNetPathValid.value = new File(c).exists())
+  WowGo.battleNetPath <== battleNetPath
+  private val lockedOn = new BooleanProperty()
   loadProperties()
 
   val actionDimension = (visualBounds.width * 0.4 + properties.getProperty("UI.Action.WidthExt", "0").toDouble,
@@ -47,22 +53,28 @@ object WowGoOn extends JFXApp {
 
           val quitButton = new Button("Quit") {
             onAction = () => {
-              //              exited set true
+              WowGo.exit()
+              exit()
               stage.close()
             }
           }
           val lockOnButton = new ToggleButton("Lock On") {
-            disable <== battleNetPath.===("")
-            onAction = () => {
-              //              fishing set this.selected.value
-            }
+            disable <== battleNetPathValid.not() or (WowGo.runningProperty and selected.not())
+            lockedOn <== selected
+            onAction = () => {}
           }
           val selectBattleNetButton = new Button("Select Battle.Net") {
-            disable <== lockOnButton.selected
+            disable <== lockOnButton.selected or WowGo.runningProperty
             val fileChooser = new FileChooser()
-            //            fileChooser.setInitialDirectory(new File(properties.getProperty("Battle.Net", ".")))
             fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Battle.Net", "Battle.net.exe"))
             onAction = () => {
+              if (battleNetPathValid.value) {
+                try {
+                  fileChooser.setInitialDirectory(new File(battleNetPath.value).getParentFile)
+                } catch {
+                  case e: Throwable =>
+                }
+              }
               val selectedFile = fileChooser.showOpenDialog(stage)
               if (selectedFile != null) {
                 properties.put("Battle.Net", selectedFile.getAbsolutePath)
@@ -72,19 +84,8 @@ object WowGoOn extends JFXApp {
             }
           }
           val runButton = new Button("Run WOW") {
-            disable <== battleNetPath.===("") or lockOnButton.selected
-            onAction = () => {
-              println("run!!!")
-            }
-          }
-          val openButton = new Button("Open") {
-            //            onAction = () => {
-            //              disable = true
-            //              new Thread(() => {
-            //                linkReopen(0)
-            //                Platform.runLater(() => disable = false)
-            //              }).start()
-            //            }
+            disable <== battleNetPathValid.not() or lockOnButton.selected or WowGo.runningProperty
+            onAction = () => WowGo.runLater("ACTION_REOPEN")
           }
           val snapshotButton = new Button("Snapshot") {
             //            onAction = () => {
@@ -104,12 +105,6 @@ object WowGoOn extends JFXApp {
             //              autoOpenShell set this.selected.value
             //            }
           }
-          val autoReconnectCheckBox = new CheckBox("Auto Reconnect") {
-            style = "-fx-text-fill: black;"
-            //            onAction = () => {
-            //              autoReconnect set this.selected.value
-            //            }
-          }
           val labelStatus = new Label("Normal") {
             style = "-fx-text-fill: black;"
             prefWidth = 60
@@ -119,7 +114,6 @@ object WowGoOn extends JFXApp {
             Seq(
               selectBattleNetButton, runButton, lockOnButton,
               //              openButton,
-              //              autoReconnectCheckBox,
               //              labelStatus,
               //              new AnchorPane {
               //                prefWidth = 20
@@ -165,8 +159,6 @@ object WowGoOn extends JFXApp {
             AnchorPane.setTopAnchor(targetPane, y - targetPane.prefHeight.value / 2 + properties.getProperty("UI.Target.YExt", "0").toDouble)
             targetPane.visible = true
           }
-
-          //          positionShower = showTargetPane
         }
         AnchorPane.setTopAnchor(configPaneContainer, 0)
         AnchorPane.setLeftAnchor(configPaneContainer, 0)
@@ -195,5 +187,22 @@ object WowGoOn extends JFXApp {
     val pOut = new PrintWriter("config.properties")
     properties.store(pOut, "")
     pOut.close()
+  }
+
+  private val executor = Executors.newSingleThreadExecutor()
+  private val executionContext = ExecutionContext.fromExecutorService(executor)
+  Future[Unit] {
+    while (!executor.isShutdown) {
+      if (lockedOn get) {
+        val delay = WowGo.run("LOCK_ON")
+        if (delay > 0) Thread.sleep((delay * 1000).toLong)
+      } else {
+        Thread.sleep(1000)
+      }
+    }
+  }(executionContext)
+
+  def exit() = {
+    executor.shutdown()
   }
 }

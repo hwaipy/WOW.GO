@@ -4,11 +4,14 @@ import java.awt.event.{InputEvent, KeyEvent}
 import java.awt.{Rectangle, Robot, Toolkit}
 import java.io.{ByteArrayOutputStream, PrintStream}
 import java.util.Properties
-
+import java.util.concurrent.Executors
 import scala.io.Source
 import scala.util.Random
 import org.python.core.PyException
 import org.python.util.PythonInterpreter
+import scalafx.beans.property.{BooleanProperty, StringProperty}
+import scala.concurrent.{ExecutionContext, Future}
+import scala.language.postfixOps
 
 object WowGo {
   private val robot = new Robot()
@@ -39,27 +42,41 @@ object WowGo {
     delay(50, 100)
   }
 
-  def actionKeyClick(keyString: String): Unit = {
-    println(keyString)
+  def actionKeyClick(keyString: String, functionKey: String): Unit = {
+    val keyCode = functionKey.toUpperCase() match {
+      case "SHIFT" => KeyEvent.VK_SHIFT
+      case "CTRL" => KeyEvent.VK_CONTROL
+      case "ALT" => KeyEvent.VK_ALT
+      case _ => -1
+    }
+    if (keyCode != -1) {
+      robot.keyPress(keyCode)
+      delay(50, 100)
+    }
     keyString.foreach(c => actionKeyClick(c))
+    if (keyCode != -1) {
+      robot.keyRelease(keyCode)
+      delay(50, 100)
+    }
   }
 
   val jythonInitProperties = new Properties()
   jythonInitProperties.setProperty("python.import.site", "false")
   PythonInterpreter.initialize(System.getProperties, jythonInitProperties, new Array[String](0))
   val interpreter = new PythonInterpreter()
+  val runningProperty = new BooleanProperty()
+  val battleNetPath = new StringProperty("")
 
-  def run() = {
+  def run(cmd: String) = {
+    runningProperty set true
     JythonBridge.UIStatus = "LOGIN"
+    JythonBridge.reactionDelayTime = -1
     try {
       val pre =
         """
           |from com.hwaipy.wow.JythonBridge import *
-        """.stripMargin
-      val logi = Source.fromFile("magic.py").getLines().toList.mkString(System.lineSeparator())
-      val post =
-        """
-          |def main():
+          |
+          |def lockOn():
           |  uistatus = UIStatus()
           |  if uistatus == 'NORMAL':
           |    UIActionNormal()
@@ -74,9 +91,21 @@ object WowGo {
           |  else:
           |    raise RuntimeError("Wrong UI Status.")
           |
-          |main()
-          |
         """.stripMargin
+      val logi = Source.fromFile("magic.py").getLines().toList.mkString(System.lineSeparator())
+      val lockOn =
+        """
+          |lockOn()
+        """.stripMargin
+      val actionReopen =
+        """
+          |actionReopen()
+        """.stripMargin
+      val post = cmd match {
+        case "LOCK_ON" => lockOn
+        case "ACTION_REOPEN" => actionReopen
+        case _ => throw new RuntimeException(s"Unknown commond: ${cmd}")
+      }
       val code = List(pre, logi, post).mkString(System.lineSeparator())
       interpreter.exec(code)
     } catch {
@@ -89,23 +118,46 @@ object WowGo {
       }
       case e: Throwable => e.printStackTrace()
     }
+    runningProperty set false
+    JythonBridge.reactionDelayTime
+  }
+
+  private val executor = Executors.newSingleThreadExecutor()
+  private val executionContext = ExecutionContext.fromExecutorService(executor)
+
+  def runLater(cmd: String, end: (Double) => Unit = (a) => {}) = {
+    runningProperty set true
+    Future[Unit] {
+      val reactionTime = run(cmd)
+      runningProperty set false
+      end(reactionTime)
+    }(executionContext)
+  }
+
+  def exit() = {
+    executor.shutdown()
   }
 }
 
 object JythonBridge {
   var UIStatus = "LOGIN"
+  var reactionDelayTime = -1.0
 
   def leftButtonClick(x: Float, y: Float) = WowGo.actionMouseClick(x * WowGo.screenSize.width, y * WowGo.screenSize.height, true)
 
   def rightButtonClick(x: Float, y: Float) = WowGo.actionMouseClick(x, y, false)
 
-  def keyClick(keyString: String) = WowGo.actionKeyClick(keyString.toUpperCase())
+  def keyClick(keyString: String, functionKey: String = "") = WowGo.actionKeyClick(keyString.toUpperCase(), functionKey)
 
   def keyClickESC() = WowGo.actionKeyClick(KeyEvent.VK_ESCAPE)
 
   def delay(time: Float) = Thread.sleep((time * 1000).toLong)
 
-  def openBattleNet() = Runtime.getRuntime.exec("open '/Users/hwaipy/Library/Application Support/Battle.net/Versions/Battle.net.app'")
+  def reactionDelay(time: Float) = reactionDelayTime = time
+
+  def openBattleNet() = Runtime.getRuntime.exec("\"" + WowGo.battleNetPath.get + "\"")
+
+  def debugSetUIStatus(status: String) = UIStatus = status
 
   Thread.setDefaultUncaughtExceptionHandler((t, e) => e.printStackTrace())
 }
