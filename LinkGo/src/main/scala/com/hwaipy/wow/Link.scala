@@ -164,7 +164,7 @@ class PatternSearcher(val screenShot: ScreenShot) {
         val validButton = (diffusioned._3 > 3 * diffusioned._4) && (diffusioned._3 > width * 0.03) && (diffusioned._4 > height * 0.005)
         dye(diffusioned._1, diffusioned._2, diffusioned._3, diffusioned._4, !validButton)
         if (validButton) {
-          println(s"${(diffusioned._1 + diffusioned._3 / 2.0) / width}, ${(diffusioned._2 + diffusioned._4 / 2.0) / height}")
+//          println(s"${(diffusioned._1 + diffusioned._3 / 2.0) / width}, ${(diffusioned._2 + diffusioned._4 / 2.0) / height}")
           buttonBuffer += diffusioned
         }
         end = 1

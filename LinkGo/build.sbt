@@ -1,11 +1,8 @@
-//enablePlugins(JavaServerAppPackaging, UniversalDeployPlugin, WindowsPlugin, WindowsDeployPlugin)
-
-name := "PD"
-version := "0.1.1"
+name := "WowGo"
+version := "0.2.0"
 scalaVersion := "2.12.8"
 organization := "com.hydra"
 libraryDependencies += "org.scalafx" %% "scalafx" % "11-R16"
-//libraryDependencies += "net.sourceforge.tess4j" % "tess4j" % "3.2.1"
 // Determine OS version of JavaFX binaries
 lazy val osName = System.getProperty("os.name") match {
   case n if n.startsWith("Linux") => "linux"
@@ -18,6 +15,7 @@ libraryDependencies ++= javaFXModules.map(m =>
   "org.openjfx" % s"javafx-$m" % "11" classifier osName
 )
 
+libraryDependencies += "org.python" % "jython" % "2.7.0"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 scalacOptions ++= Seq("-feature")
 scalacOptions ++= Seq("-deprecation")
