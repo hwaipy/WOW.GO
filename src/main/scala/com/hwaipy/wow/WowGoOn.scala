@@ -1,8 +1,9 @@
 package com.hwaipy.wow
 
 import java.io.{File, FileReader, PrintWriter}
-import java.util.Properties
+import java.util.{Properties, Timer, TimerTask}
 import java.util.concurrent.Executors
+
 import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.geometry.{Insets, Pos}
@@ -11,12 +12,12 @@ import scalafx.scene.control.{Button, CheckBox, Label, ToggleButton}
 import scalafx.scene.layout.{AnchorPane, HBox}
 import scalafx.stage.{FileChooser, Screen, StageStyle}
 import scalafx.Includes._
-import scalafx.beans.property.{BooleanProperty, StringProperty}
+import scalafx.beans.property.{BooleanProperty, LongProperty, StringProperty}
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
 object WowGoOn extends JFXApp {
-  //  WowGo.run()
   private val visualBounds = Screen.primary.visualBounds
   private val properties = new Properties()
   private val battleNetPath = new StringProperty("")
@@ -24,6 +25,13 @@ object WowGoOn extends JFXApp {
   battleNetPath.onChange((a, b, c) => battleNetPathValid.value = new File(c).exists())
   WowGo.battleNetPath <== battleNetPath
   private val lockedOn = new BooleanProperty()
+  private val fishPaneVisible = new BooleanProperty()
+  private val fishPaneClock = new LongProperty()
+  private val fishPaneTimer = new Timer()
+  fishPaneTimer.schedule(new TimerTask {
+    override def run(): Unit = fishPaneVisible set (System.currentTimeMillis() < fishPaneClock.get + 1000)
+  }, 1000, 100)
+
   loadProperties()
 
   val actionDimension = (visualBounds.width * 0.4 + properties.getProperty("UI.Action.WidthExt", "0").toDouble,
@@ -87,46 +95,14 @@ object WowGoOn extends JFXApp {
             disable <== battleNetPathValid.not() or lockOnButton.selected or WowGo.runningProperty
             onAction = () => WowGo.runLater("ACTION_REOPEN")
           }
-          val snapshotButton = new Button("Snapshot") {
-            //            onAction = () => {
-            //              val center = capture(true)
-            //              actionMouseClick(center._1 + captureBounds._1, center._2 + captureBounds._2)
-            //              actionMouseClickPackage(-1, false)
-            //            }
+          val testButton = new Button("Test") {
+            onAction = () => {
+              showTargetRectangle()
+            }
           }
-          val fishingButton = new ToggleButton("Go Fish") {
-            //            onAction = () => {
-            //              fishing set this.selected.value
-            //            }
-          }
-          val autoOpenShellCheckBox = new CheckBox("Auto Open&Eat") {
-            style = "-fx-text-fill: black;"
-            //            onAction = () => {
-            //              autoOpenShell set this.selected.value
-            //            }
-          }
-          val labelStatus = new Label("Normal") {
-            style = "-fx-text-fill: black;"
-            prefWidth = 60
-          }
-          //          linkStatusLabelLink set labelStatus
           children =
             Seq(
               selectBattleNetButton, runButton, lockOnButton,
-              //              openButton,
-              //              labelStatus,
-              //              new AnchorPane {
-              //                prefWidth = 20
-              //              },
-              //              snapshotButton,
-              //              fishingButton,
-              //              new AnchorPane {
-              //                prefWidth = 20
-              //              },
-              //              autoOpenShellCheckBox,
-              //              new AnchorPane {
-              //                prefWidth = 20
-              //              },
               new AnchorPane {
                 prefWidth = 20
               },
@@ -145,6 +121,7 @@ object WowGoOn extends JFXApp {
           styleClass += "actionPane"
           prefHeight = actionBounds._4
           prefWidth = actionBounds._3
+          visible <== fishPaneVisible
 
           val targetPane = new AnchorPane() {
             styleClass += "targetPane"
@@ -173,6 +150,10 @@ object WowGoOn extends JFXApp {
   }
   stage.initStyle(StageStyle.Transparent)
   stage.alwaysOnTop = true
+
+  def showTargetRectangle() = {
+    fishPaneClock set System.currentTimeMillis()
+  }
 
   def loadProperties() = {
     val pIn = new FileReader("config.properties")
@@ -204,5 +185,6 @@ object WowGoOn extends JFXApp {
 
   def exit() = {
     executor.shutdown()
+    fishPaneTimer.cancel()
   }
 }

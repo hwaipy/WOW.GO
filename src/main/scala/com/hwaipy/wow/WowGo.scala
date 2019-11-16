@@ -11,7 +11,6 @@ import org.python.core.PyException
 import org.python.util.PythonInterpreter
 import scalafx.beans.property.{BooleanProperty, StringProperty}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.postfixOps
 
 object WowGo {
   private val robot = new Robot()
@@ -69,7 +68,7 @@ object WowGo {
 
   def run(cmd: String) = {
     runningProperty set true
-    JythonBridge.UIStatus = "LOGIN"
+    JythonBridge.UIStatus = checkUIStatus()
     JythonBridge.reactionDelayTime = -1
     try {
       val pre =
@@ -147,7 +146,9 @@ object JythonBridge {
 
   def rightButtonClick(x: Float, y: Float) = WowGo.actionMouseClick(x, y, false)
 
-  def keyClick(keyString: String, functionKey: String = "") = WowGo.actionKeyClick(keyString.toUpperCase(), functionKey)
+  def keyClick(keyString: String, functionKey: String) = WowGo.actionKeyClick(keyString.toUpperCase(), functionKey)
+
+  def keyClick(keyString: String) = WowGo.actionKeyClick(keyString.toUpperCase(), "")
 
   def keyClickESC() = WowGo.actionKeyClick(KeyEvent.VK_ESCAPE)
 

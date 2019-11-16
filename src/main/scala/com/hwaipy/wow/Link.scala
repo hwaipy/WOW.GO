@@ -10,20 +10,11 @@ import scala.collection.mutable.ListBuffer
 object LinkGo {
   def status(image: BufferedImage) = {
     val ps = new PatternSearcher(ScreenShot(image))
-    ps.saveTargetSpotImage("TTT.png")
     ps.status
   } match {
     case "QUEUE" => if (new PatternSearcher(ScreenShot(image, false)).checkQueueStatus) "QUEUE" else "ERROR"
     case s => s
   }
-
-  //  val root = "/Users/Hwaipy/Downloads/WOWGO-master/LinkGo/Test/WOWT"
-  //  println(status(ImageIO.read(new File(root, "1.png"))))
-  //  println(status(ImageIO.read(new File(root, "2.png"))))
-  //  println(status(ImageIO.read(new File(root, "3.png"))))
-  //  println(status(ImageIO.read(new File(root, "4.png"))))
-  //  println(status(ImageIO.read(new File(root, "5.png"))))
-  //  println(status(ImageIO.read(new File(root, "6.png"))))
 }
 
 object ScreenShot {
@@ -164,7 +155,6 @@ class PatternSearcher(val screenShot: ScreenShot) {
         val validButton = (diffusioned._3 > 3 * diffusioned._4) && (diffusioned._3 > width * 0.03) && (diffusioned._4 > height * 0.005)
         dye(diffusioned._1, diffusioned._2, diffusioned._3, diffusioned._4, !validButton)
         if (validButton) {
-//          println(s"${(diffusioned._1 + diffusioned._3 / 2.0) / width}, ${(diffusioned._2 + diffusioned._4 / 2.0) / height}")
           buttonBuffer += diffusioned
         }
         end = 1
@@ -172,9 +162,6 @@ class PatternSearcher(val screenShot: ScreenShot) {
     }
     buttonBuffer.toList
   }
-
-  //  private val stop = System.nanoTime()
-  //  println(s"Calculation finished in ${(stop - start) / 1e6} ms.")
 
   def createTargetSpotImage = {
     val imageS = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
@@ -194,10 +181,6 @@ class PatternSearcher(val screenShot: ScreenShot) {
         case 0 => Color.WHITE.getRGB
       })
     }))
-    ImageIO.write(screenShot.image, "png", new File("IMG.png"))
-    ImageIO.write(imageS, "png", new File("IMGS.png"))
-    ImageIO.write(imageSO, "png", new File("IMGSO.png"))
-    ImageIO.write(imageT, "png", new File("IMGT.png"))
     imageT
   }
 
@@ -230,7 +213,6 @@ class PatternSearcher(val screenShot: ScreenShot) {
       if (rgb._1 > 200 && rgb._2 > 160 && rgb._3 < 110) 1 else 0
     }).sum)
     val yellowRowDiffed = Range(1, yellowRows.size - 1).map(i => yellowRows(i) > 5 || yellowRows(i - 1) > 5 || yellowRows(i + 1) > 5)
-    ImageIO.write(subScreenShot.image, "png", new File("test.png"))
     val yellowRowSections = {
       val buffer = new ListBuffer[Tuple2[Int, Int]]()
       var position = 0
