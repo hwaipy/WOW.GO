@@ -17,6 +17,40 @@ object LinkGo {
   }
 }
 
+object FishGo {
+  def capture(image: BufferedImage, thresholds: Tuple3[Double, Double, Double]) = {
+    val screenShot = new ScreenShot(image)
+    val hotSpots = Range(0, image.getWidth * image.getHeight).map(i => {
+      val rgb = screenShot.getRGBTuple(i)
+      if (rgb._1 > rgb._2 * thresholds._1 && rgb._1 > rgb._3 * thresholds._2 && rgb._2 > rgb._3 * thresholds._3) 1 else 0
+    }).toArray
+//    if (true) {
+//      ImageIO.write(screenShot.image, "png", new File("SS.png"))
+//      for (x <- 0 until screenShot.image.getWidth) {
+//        for (y <- 0 until screenShot.image.getHeight) {
+//          if (hotSpots(y * screenShot.image.getWidth + x) > 0) screenShot.image.setRGB(x, y, Color.BLACK.getRGB)
+//          else screenShot.image.setRGB(x, y, Color.WHITE.getRGB)
+//        }
+//      }
+//      ImageIO.write(screenShot.image, "png", new File("SSF.png"))
+//    }
+    var centerXSum = 0
+    var centerYSum = 0
+    var weight = 0
+    for (x <- 0 until image.getWidth) {
+      for (y <- 0 until image.getHeight) {
+        if (hotSpots(y * image.getWidth + x) > 0) {
+          centerXSum += x
+          centerYSum += y
+          weight += 1
+        }
+      }
+    }
+    val center = (centerXSum.toDouble / weight, centerYSum.toDouble / weight)
+    center
+  }
+}
+
 object ScreenShot {
   val resizeWidth = 500
 
