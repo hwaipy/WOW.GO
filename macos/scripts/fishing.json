@@ -1,0 +1,9 @@
+{
+  "name": "钓鱼 · 10 次",
+  "steps": [
+    { "action": "repeat", "count": 10, "steps": [
+      { "action": "fish" },
+      { "action": "wait", "seconds": 2 }
+    ] }
+  ]
+}

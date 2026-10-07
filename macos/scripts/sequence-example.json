@@ -1,0 +1,13 @@
+{
+  "name": "控制序列示例（先演练）",
+  "steps": [
+    { "action": "key", "key": "2", "modifiers": ["shift"] },
+    { "action": "wait", "seconds": 1.2 },
+    { "action": "click", "x": 0.5, "y": 0.3, "button": "right" },
+    { "action": "repeat", "count": 2, "steps": [
+      { "action": "key", "key": "space", "seconds": 0.1 },
+      { "action": "wait", "seconds": 1 }
+    ] },
+    { "action": "capture" }
+  ]
+}

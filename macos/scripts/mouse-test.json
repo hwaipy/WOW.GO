@@ -1,0 +1,1 @@
+{"name":"后台鼠标闭环测试","steps":[{"action":"key","key":"m"},{"action":"wait","seconds":0.6},{"action":"capture"},{"action":"click","x":0.9336,"y":0.0375,"button":"left"},{"action":"wait","seconds":0.6},{"action":"capture"}]}

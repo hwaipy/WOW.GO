@@ -1,0 +1,1 @@
+{"name":"后台鼠标关闭地图测试","steps":[{"action":"click","x":0.9336,"y":0.0375,"button":"left"},{"action":"wait","seconds":1},{"action":"capture"}]}

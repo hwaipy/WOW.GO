@@ -1,0 +1,1 @@
+{"name":"打开地图并截图","steps":[{"action":"key","key":"m"},{"action":"wait","seconds":1},{"action":"capture"}]}
