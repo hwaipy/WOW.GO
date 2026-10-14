@@ -12,7 +12,7 @@ struct ContentView:View {
         VStack(spacing:0) {
             HStack(spacing:14) {
                 Image(systemName:"fish.fill").font(.system(size:26)).foregroundStyle(.cyan)
-                VStack(alignment:.leading,spacing:3) {Text("WOW.GO").font(.system(size:20,weight:.bold,design:.rounded));Text("WINDOW CONTROL / macOS").font(.system(size:9,weight:.medium,design:.monospaced)).foregroundStyle(.secondary)}
+                VStack(alignment:.leading,spacing:3) {Text("FishGo").font(.system(size:20,weight:.bold,design:.rounded));Text("WINDOW CONTROL / macOS").font(.system(size:9,weight:.medium,design:.monospaced)).foregroundStyle(.secondary)}
                 Spacer()
                 Circle().fill(m.connected ? Color.green:Color.orange).frame(width:7,height:7)
                 Text(m.connected ? "游戏已连接":"等待游戏").font(.system(size:12))
@@ -123,8 +123,8 @@ struct Preview:View {
     func applicationDidFinishLaunching(_ notification:Notification) {
         let m=GoModel();model=m
         let w=NSWindow(contentRect:NSRect(x:0,y:0,width:1260,height:850),styleMask:[.titled,.closable,.miniaturizable,.resizable],backing:.buffered,defer:false)
-        w.title="WOW.GO · Background Control";w.contentView=NSHostingView(rootView:ContentView(m:m));w.center();w.setFrameAutosaveName("WowGoMain");w.makeKeyAndOrderFront(nil);window=w
-        let menu=NSMenu();let app=NSMenuItem();menu.addItem(app);let submenu=NSMenu();submenu.addItem(withTitle:"退出 WOW.GO",action:#selector(NSApplication.terminate(_:)),keyEquivalent:"q");app.submenu=submenu
+        w.title="FishGo · Background Control";w.contentView=NSHostingView(rootView:ContentView(m:m));w.center();w.setFrameAutosaveName("WowGoMain");w.makeKeyAndOrderFront(nil);window=w
+        let menu=NSMenu();let app=NSMenuItem();menu.addItem(app);let submenu=NSMenu();submenu.addItem(withTitle:"退出 FishGo",action:#selector(NSApplication.terminate(_:)),keyEquivalent:"q");app.submenu=submenu
         let edit=NSMenuItem();edit.title="编辑";let em=NSMenu(title:"编辑");em.addItem(withTitle:"撤销",action:Selector(("undo:")),keyEquivalent:"z");em.addItem(withTitle:"剪切",action:#selector(NSText.cut(_:)),keyEquivalent:"x");em.addItem(withTitle:"复制",action:#selector(NSText.copy(_:)),keyEquivalent:"c");em.addItem(withTitle:"粘贴",action:#selector(NSText.paste(_:)),keyEquivalent:"v");em.addItem(withTitle:"全选",action:#selector(NSText.selectAll(_:)),keyEquivalent:"a");edit.submenu=em;menu.addItem(edit);NSApplication.shared.mainMenu=menu
         if CommandLine.arguments.contains("--demo") {m.demo()}
         if CommandLine.arguments.contains("--connect") {m.connect()}

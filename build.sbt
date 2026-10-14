@@ -1,4 +1,4 @@
-name := "WowGo"
+name := "FishGo"
 version := "1.0.1"
 scalaVersion := "2.12.8"
 organization := "com.hwaipy"

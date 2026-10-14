@@ -17,13 +17,13 @@ import scalafx.beans.property.{BooleanProperty, LongProperty, StringProperty}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
-object WowGoOn extends JFXApp {
+object FishGoOn extends JFXApp {
   private val visualBounds = Screen.primary.visualBounds
   private val properties = new Properties()
   private val battleNetPath = new StringProperty("")
   private val battleNetPathValid = new BooleanProperty()
   battleNetPath.onChange((a, b, c) => battleNetPathValid.value = new File(c).exists())
-  WowGo.battleNetPath <== battleNetPath
+  FishGo.battleNetPath <== battleNetPath
   private val lockedOn = new BooleanProperty()
   private val fishPaneVisible = new BooleanProperty()
   private val fishPaneClock = new LongProperty()
@@ -42,7 +42,7 @@ object WowGoOn extends JFXApp {
     actionDimension._1, actionDimension._2)
 
   stage = new PrimaryStage {
-    title = "WOW.GO"
+    title = "FishGo"
     x = 0
     y = 0
     width = visualBounds.width
@@ -61,18 +61,18 @@ object WowGoOn extends JFXApp {
 
           val quitButton = new Button("Quit") {
             onAction = () => {
-              WowGo.exit()
+              FishGo.exit()
               exit()
               stage.close()
             }
           }
           val lockOnButton = new ToggleButton("Lock On") {
-            disable <== battleNetPathValid.not() or (WowGo.runningProperty and selected.not())
+            disable <== battleNetPathValid.not() or (FishGo.runningProperty and selected.not())
             lockedOn <== selected
             onAction = () => {}
           }
           val selectBattleNetButton = new Button("Select Battle.Net") {
-            disable <== lockOnButton.selected or WowGo.runningProperty
+            disable <== lockOnButton.selected or FishGo.runningProperty
             val fileChooser = new FileChooser()
             fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Battle.Net", "Battle.net.exe"))
             onAction = () => {
@@ -92,8 +92,8 @@ object WowGoOn extends JFXApp {
             }
           }
           val runButton = new Button("Run WOW") {
-            disable <== battleNetPathValid.not() or lockOnButton.selected or WowGo.runningProperty
-            onAction = () => WowGo.runLater("ACTION_REOPEN")
+            disable <== battleNetPathValid.not() or lockOnButton.selected or FishGo.runningProperty
+            onAction = () => FishGo.runLater("ACTION_REOPEN")
           }
           val testButton = new Button("Test") {
             onAction = () => {
@@ -175,7 +175,7 @@ object WowGoOn extends JFXApp {
   Future[Unit] {
     while (!executor.isShutdown) {
       if (lockedOn get) {
-        val delay = WowGo.run("LOCK_ON")
+        val delay = FishGo.run("LOCK_ON")
         if (delay > 0) Thread.sleep((delay * 1000).toLong)
       } else {
         Thread.sleep(1000)

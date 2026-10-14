@@ -74,7 +74,7 @@ let testScript = """
     func authorize() {
         _ = CGRequestScreenCaptureAccess()
         _ = AXIsProcessTrustedWithOptions([kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String:true] as CFDictionary)
-        log("请在系统设置中允许 WowGo 的屏幕录制与辅助功能权限；授权后重新打开应用")
+        log("请在系统设置中允许 FishGo 的屏幕录制与辅助功能权限；授权后重新打开应用")
     }
     func connect() {
         guard !running && !connecting else {return}

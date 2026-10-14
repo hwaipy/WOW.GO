@@ -1,6 +1,6 @@
-# WOW.GO
+# FishGo
 
-`forever` 分支新增原生 macOS 后台自动化客户端，实现在 `macos/`。原 Scala/Jython 项目保留在原路径。
+`wow` 分支新增原生 macOS 后台自动化客户端，实现在 `macos/`。原 Scala/Jython 项目保留在原路径。
 
 ## macOS 版
 

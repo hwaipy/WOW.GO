@@ -90,7 +90,7 @@ final class FrameReceiver:NSObject,SCStreamOutput,SCStreamDelegate {
     var receiver:FrameReceiver?
     var lastDelivered=Date.distantPast
     func connect() async throws {
-        guard CGPreflightScreenCaptureAccess() else {throw GoError("需要屏幕录制权限：点击「授权」，在系统设置中允许 WowGo，然后重启应用。")}
+        guard CGPreflightScreenCaptureAccess() else {throw GoError("需要屏幕录制权限：点击「授权」，在系统设置中允许 FishGo，然后重启应用。")}
         let apps = NSRunningApplication.runningApplications(withBundleIdentifier:wowBundle)
         guard apps.count == 1, let a=apps.first else {throw GoError("请运行一个魔兽世界客户端（当前 \(apps.count) 个）")}
         let content = try await SCShareableContent.excludingDesktopWindows(true,onScreenWindowsOnly:false)
@@ -107,7 +107,7 @@ final class FrameReceiver:NSObject,SCStreamOutput,SCStreamDelegate {
         c.minimumFrameInterval=CMTime(value:1,timescale:12)
         let output=FrameReceiver()
         let fresh=SCStream(filter:filter!,configuration:c,delegate:output)
-        try fresh.addStreamOutput(output,type:.screen,sampleHandlerQueue:DispatchQueue(label:"com.hwaipy.wowgo.frames",qos:.userInitiated))
+        try fresh.addStreamOutput(output,type:.screen,sampleHandlerQueue:DispatchQueue(label:"com.hwaipy.fishgo.frames",qos:.userInitiated))
         try await fresh.startCapture()
         receiver=output;stream=fresh;lastDelivered=Date.distantPast
         diagnostic="PID \(a.processIdentifier) · 窗口 \(w.windowID) · \(Int(w.frame.width))×\(Int(w.frame.height)) pt"
@@ -130,7 +130,7 @@ final class FrameReceiver:NSObject,SCStreamOutput,SCStreamDelegate {
 
     func checkInput() throws -> NSRunningApplication {
         try checkIdentity()
-        guard AXIsProcessTrusted() else {throw GoError("需要辅助功能权限：请在系统设置中允许 WowGo")}
+        guard AXIsProcessTrusted() else {throw GoError("需要辅助功能权限：请在系统设置中允许 FishGo")}
         guard let a=app, !a.isActive else {throw GoError("游戏进入前台，已停止输入。切回其他 App 后可重新运行。")}
         return a
     }

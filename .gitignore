@@ -28,6 +28,7 @@ venv
 Pydra/Services/WaveformGenerator/USTCDA/测试数据/序列数据生成波形预览.png
 
 # Locally built macOS application and diagnostics
+macos/FishGo.app/
 macos/WowGo.app/
 macos/validation/
 macos/*.lock

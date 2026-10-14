@@ -38,7 +38,7 @@ func selfTest() throws {
         let hit=detector.feed(b.patch(p,radius:s.radius),settings:s)
         try expect(hit==shouldBite,"real frame regression: \(after)")
     }
-    let lockURL=URL(fileURLWithPath:NSTemporaryDirectory()).appendingPathComponent("wowgo-test-\(UUID().uuidString).lock")
+    let lockURL=URL(fileURLWithPath:NSTemporaryDirectory()).appendingPathComponent("fishgo-test-\(UUID().uuidString).lock")
     let first=try RunLease(lockURL)
     do {let second=try RunLease(lockURL);second.release();throw GoError("duplicate run accepted")} catch let e as GoError {if e.message=="duplicate run accepted" {throw e}}
     first.release();let next=try RunLease(lockURL);next.release();try? FileManager.default.removeItem(at:lockURL)

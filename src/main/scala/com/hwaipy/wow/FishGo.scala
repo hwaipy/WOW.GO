@@ -12,7 +12,7 @@ import org.python.util.PythonInterpreter
 import scalafx.beans.property.{BooleanProperty, StringProperty}
 import scala.concurrent.{ExecutionContext, Future}
 
-object WowGo {
+object FishGo {
   private val robot = new Robot()
   private val random = new Random()
   val screenSize = Toolkit.getDefaultToolkit.getScreenSize
@@ -142,21 +142,21 @@ object JythonBridge {
   var UIStatus = "LOGIN"
   var reactionDelayTime = -1.0
 
-  def leftButtonClick(x: Float, y: Float) = WowGo.actionMouseClick(x * WowGo.screenSize.width, y * WowGo.screenSize.height, true)
+  def leftButtonClick(x: Float, y: Float) = FishGo.actionMouseClick(x * FishGo.screenSize.width, y * FishGo.screenSize.height, true)
 
-  def rightButtonClick(x: Float, y: Float) = WowGo.actionMouseClick(x, y, false)
+  def rightButtonClick(x: Float, y: Float) = FishGo.actionMouseClick(x, y, false)
 
-  def keyClick(keyString: String, functionKey: String) = WowGo.actionKeyClick(keyString.toUpperCase(), functionKey)
+  def keyClick(keyString: String, functionKey: String) = FishGo.actionKeyClick(keyString.toUpperCase(), functionKey)
 
-  def keyClick(keyString: String) = WowGo.actionKeyClick(keyString.toUpperCase(), "")
+  def keyClick(keyString: String) = FishGo.actionKeyClick(keyString.toUpperCase(), "")
 
-  def keyClickESC() = WowGo.actionKeyClick(KeyEvent.VK_ESCAPE)
+  def keyClickESC() = FishGo.actionKeyClick(KeyEvent.VK_ESCAPE)
 
   def delay(time: Float) = Thread.sleep((time * 1000).toLong)
 
   def reactionDelay(time: Float) = reactionDelayTime = time
 
-  def openBattleNet() = Runtime.getRuntime.exec("\"" + WowGo.battleNetPath.get + "\"")
+  def openBattleNet() = Runtime.getRuntime.exec("\"" + FishGo.battleNetPath.get + "\"")
 
   def debugSetUIStatus(status: String) = UIStatus = status
 

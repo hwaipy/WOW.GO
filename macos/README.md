@@ -1,6 +1,6 @@
-# WOW.GO — macOS 后台控制
+# FishGo — macOS 后台控制
 
-原生 macOS GUI，参考 [hwaipy/WOW.GO](https://github.com/hwaipy/WOW.GO) 的控制面板、脚本动作和图像判断思路。此版是 Swift/AppKit/SwiftUI 实现，采用游戏窗口专用截图和进程定向输入。原项目的 `magic.py` 不直接兼容；控制序列用可导入/导出的 JSON 定义。
+原生 macOS GUI，参考 [hwaipy/FishGo](https://github.com/hwaipy/FishGo) 的控制面板、脚本动作和图像判断思路。此版是 Swift/AppKit/SwiftUI 实现，采用游戏窗口专用截图和进程定向输入。原项目的 `magic.py` 不直接兼容；控制序列用可导入/导出的 JSON 定义。
 
 ## 启动
 
@@ -11,7 +11,7 @@ cd macos
 ./Start.command
 ```
 
-也可以直接打开 **WowGo.app**。macOS 对终端启动与直接启动的权限归属可能不同；直接启动时，请点「授权」，在系统设置中允许 WowGo 的「屏幕与系统音频录制」和「辅助功能」，然后重新打开。重新构建后的临时签名也可能需要重新授权。
+也可以直接打开 **FishGo.app**。macOS 对终端启动与直接启动的权限归属可能不同；直接启动时，请点「授权」，在系统设置中允许 FishGo 的「屏幕与系统音频录制」和「辅助功能」，然后重新打开。重新构建后的临时签名也可能需要重新授权。
 
 ## 界面与使用
 
@@ -85,8 +85,8 @@ cd macos
 
 ```sh
 ./build.sh
-./WowGo.app/Contents/MacOS/WowGo --integration-test
-./WowGo.app/Contents/MacOS/WowGo --probe
+./FishGo.app/Contents/MacOS/FishGo --integration-test
+./FishGo.app/Contents/MacOS/FishGo --probe
 ```
 
 `build.sh` 编译 app、临时签名并运行识别和脚本校验测试。集成测试验证循环、动作顺序、合成咬钩到右键收竿以及取消后不再输入。`--probe` 连续读取 12 个真实窗口帧并报告候选浮漂坐标。
@@ -94,7 +94,7 @@ cd macos
 命令行执行脚本（默认演练，只有 `--real` 才发输入）：
 
 ```sh
-./WowGo.app/Contents/MacOS/WowGo --run-script scripts/fish-once.json --real
+./FishGo.app/Contents/MacOS/FishGo --run-script scripts/fish-once.json --real
 ```
 
 可加 `--trace-dir /tmp/wow-trace` 保存定位图、变化最大帧、水花最大帧和逐帧 CSV，便于微调。不要同时运行多个自动化实例。
@@ -102,3 +102,5 @@ cd macos
 设置、脚本及截图保存在 `~/Library/Application Support/WowGo/`。启动默认恢复脚本和参数，但不会自动开始输入。
 
 详见 [验证记录](VALIDATION.md)。
+
+更名兼容：应用与构建产物名称为 `FishGo`。保留原 bundle identifier `com.hwaipy.wowgo.background`、窗口布局键及 `WowGo` 数据目录，继续使用既有权限身份、脚本和参数；重新构建后的临时签名仍可能需要重新授权。
